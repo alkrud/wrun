@@ -1,19 +1,31 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Werror -Wno-absolute-value -Wno-sign-compare -pedantic
-LFLAGS=-static -L lib/ -lm -lraylib -lopengl32 -lgdi32 -lwinmm -Wl,--subsystem,windows
-EXEC=./build/wrun
-SRC=$(shell ls ./src/*.c)
+SRC=$(wildcard ./src/*.c)
+CFLAGS=-O3 -Wall -Wextra -Werror -Wno-absolute-value -Wno-sign-compare -pedantic
+DFLAGS=-O0 -g -Wall -Wextra -Wno-absolute-value -Wno-sign-compare -pedantic
+LFLAGS_WIN=-L lib/win/ -lm -lraylib -lopengl32 -lgdi32 -lwinmm -Wl,--subsystem,windows
+LFLAGS=-L lib/linux/ -lm -lraylib -lglfw
+BUILD=build
+EXE=$(BUILD)/wrun
+DEBUG=$(BUILD)/wrun-debug
+DEFS=
 
-all: release
+all: $(BUILD) $(EXE) $(DEBUG)
 
-release: $(SRC) ready
-	$(CC) -o $(EXEC) $(SRC) -O3 $(CFLAGS) $(LFLAGS)
+$(EXE): $(SRC)
+	$(CC) $(DEFS) $(CFLAGS) -o $(EXE) $(SRC) $(LFLAGS)
 
-debug: $(SRC) ready
-	$(CC) -o $(EXEC) $(SRC) -O0 -g $(CFLAGS) $(LFLAGS)
+$(DEBUG): $(SRC)
+	$(CC) $(DEFS) $(DFLAGS) -o $(DEBUG) $(SRC) $(LFLAGS)
 
-ready:
-	$(shell mkdir build)
+run: $(EXE)
+	./$(EXE)
 
-run: release
-	$(shell $(EXEC))
+debug: $(DEBUG)
+	./$(DEBUG)
+
+$(BUILD):
+	mkdir -p $(BUILD)
+
+.PHONY: clean
+clean:
+	rm -rf build
