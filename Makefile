@@ -12,6 +12,7 @@ LFLAGS_LNX=-L$(LIBDIR) -lm -l:$(RAYLIB_LNX) -lX11 -lglfw
 LFLAGS_WIN=-static -L$(LIBDIR) -lm -l:$(RAYLIB_WIN) -lopengl32 -lgdi32 -lwinmm -lwinpthread -Wl,--subsystem,windows
 LFLAGS=
 MINGW=
+ISWIN=
 BUILD=build
 EXE=$(BUILD)/wrun
 DEBUG=$(BUILD)/wrun-debug
@@ -20,9 +21,11 @@ DEFS=
 ifeq ($(OS),Windows_NT)
 	LFLAGS+=$(LFLAGS_WIN)
 	MINGW+=gcc
+	ISWIN+=true
 else
 	LFLAGS+=$(LFLAGS_LNX)
 	MINGW+=x86_64-w64-mingw32-gcc
+	ISWIN+=false
 endif
 
 all: $(BUILD) $(EXE) $(DEBUG)
@@ -36,9 +39,9 @@ $(DEBUG): $(SRC) $(RAYLIB)
 $(RAYLIB):
 	git clone --depth=1 https://github.com/raysan5/raylib.git $(RAYLIB_PATH)
 	make -j8 -C $(RAYLIB_PATH)/src
-	cp $(RAYLIB) $(LIBDIR)/$(RAYLIB_LNX)
-	make -j8 -C $(RAYLIB_PATH)/src clean
-	make -j8 -C $(RAYLIB_PATH)/src CC=$(MINGW) PLATFORM_OS=WINDOWS
+	$(ISWIN) || cp $(RAYLIB) $(LIBDIR)/$(RAYLIB_LNX)
+	$(ISWIN) || make -j8 -C $(RAYLIB_PATH)/src clean
+	$(ISWIN) || make -j8 -C $(RAYLIB_PATH)/src CC=$(MINGW) PLATFORM_OS=WINDOWS
 	cp $(RAYLIB) $(LIBDIR)/$(RAYLIB_WIN)
 
 run: $(EXE)
