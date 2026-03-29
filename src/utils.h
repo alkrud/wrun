@@ -34,7 +34,7 @@ LIST_DEF(String, char);
 LIST_DEF(StringList, String);
 LIST_DEF(CstrList, char*);
 
-static inline void pause(bool (*resume_checker)(void))
+static inline void pause_something(bool (*resume_checker)(void))
 {
     while (!resume_checker()) {
         WaitTime(0.5f);

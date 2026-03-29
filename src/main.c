@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <math.h>
+#include <unistd.h>
 #define SIMPLE_CALC_IMPLEMENTATION
 #include "simple_calc.h"
 #include "raylib.h"
@@ -166,7 +167,7 @@ void* get_bins(void *_list)
 {
     Bins *bins = (Bins*)_list;
 
-    char *Path = getenv("path");
+    char *Path = getenv("PATH");
 
 	char *cur_path = Path; 
 
@@ -231,7 +232,7 @@ StrMap import_aliases(void)
 {
     const char *home_env = getenv("HOME");
     char aliases_path[100]; 
-    sprintf(aliases_path, "%s%s", home_env, "\\.aliases.txt");
+    sprintf(aliases_path, "%s%s", home_env, "/.aliases.txt");
     StrMap map = strmap_new();
 
     if (!FileExists(aliases_path)) return map;
@@ -320,7 +321,11 @@ int main(void)
     // app.font = LoadFontEx(flist.paths[0], app.font_size, NULL, 0);
     // printf("Font: %s\n", flist.paths[0]);
     app.font_size = 30;
-    app.font = LoadFontEx("C:\\Windows\\Fonts\\consola.ttf", app.font_size, NULL, 0);
+#if defined (__WIN32__)
+    app.font = LoadFontEx("C:\\Windows\\Fonts\\cascadia.ttf", app.font_size, NULL, 0);
+#else
+    app.font = LoadFontEx("/usr/share/fonts/CascadiaMono/static/CascadiaMono-Regular.ttf", app.font_size, NULL, 0);
+#endif
     if (!IsFontValid(app.font)) {
         app.font = GetFontDefault();
     }
@@ -364,8 +369,14 @@ int main(void)
                     SetClipboardText(selected);
                 }
                 else {
+#if defined (__WIN32__)
                     sprintf(temp, "start /b %s", selected);
                     system(temp);
+#else
+                    if (fork() == 0) {
+                        execl(selected, "selected", NULL);
+                    }
+#endif
                 }
 
                 list_clear(&app.input.buffer);
