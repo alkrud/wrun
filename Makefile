@@ -11,7 +11,7 @@ RAYLIB_WIN=libraylib-win.a
 LFLAGS_LNX=-L$(LIBDIR) -lm -l:$(RAYLIB_LNX) -lX11 -lglfw
 LFLAGS_WIN=-static -L$(LIBDIR) -lm -l:$(RAYLIB_WIN) -lopengl32 -lgdi32 -lwinmm -lwinpthread -Wl,--subsystem,windows
 LFLAGS=
-MINGW=x86_64-w64-mingw32-gcc
+MINGW=
 BUILD=build
 EXE=$(BUILD)/wrun
 DEBUG=$(BUILD)/wrun-debug
@@ -19,8 +19,10 @@ DEFS=
 
 ifeq ($(OS),Windows_NT)
 	LFLAGS+=$(LFLAGS_WIN)
+	MINGW+=gcc
 else
 	LFLAGS+=$(LFLAGS_LNX)
+	MINGW+=x86_64-w64-mingw32-gcc
 endif
 
 all: $(BUILD) $(EXE) $(DEBUG)
